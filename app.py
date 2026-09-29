@@ -3,7 +3,6 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import gspread
 import streamlit as st
-import streamlit.components.v1 as components
 
 # --- 1. KONFIGURASI HALAMAN ---
 st.set_page_config(
@@ -13,152 +12,157 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# --- 2. CSS STYLING & FLOATING CONTROLS ---
+# --- 2. CSS STYLING & INTERAKTIVITAS SCROLL ---
 st.markdown(
     """
 <style>
-    /* Hilangkan header default streamlit */
-    header[data-testid="stHeader"] {display: none !important;}
+    /* Sembunyikan default Streamlit header & footer */
+    header {visibility: hidden;}
+    footer {visibility: hidden;}
     
-    /* Beri ruang atas dan bawah agar konten tidak tertutup fixed bar */
     .block-container {
-        padding-top: 5.5rem !important;
-        padding-bottom: 7.5rem !important;
-        max-width: 1200px;
+        padding-top: 1rem !important;
+        padding-bottom: 6rem !important;
+        max-width: 1200px !important;
     }
 
-    /* Fixed Top Sticky Progress Bar */
-    .fixed-top-bar {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        z-index: 99999;
-        background: rgba(255, 255, 255, 0.95);
+    /* 1. STICKY PROGRESS BAR ATAS */
+    .sticky-top-header {
+        position: -webkit-sticky;
+        position: sticky;
+        top: 0.5rem;
+        z-index: 999;
+        background: rgba(255, 255, 255, 0.94);
         backdrop-filter: blur(10px);
         -webkit-backdrop-filter: blur(10px);
-        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
-        padding: 10px 20px;
+        padding: 12px 18px;
+        margin-bottom: 24px;
+        border-radius: 16px;
+        border: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
     }
-
+    
     @media (prefers-color-scheme: dark) {
-        .fixed-top-bar {
-            background: rgba(14, 17, 23, 0.95);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        .sticky-top-header {
+            background: rgba(18, 18, 20, 0.94);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
         }
     }
 
-    .brand-title {
-        font-size: 1.1rem;
-        font-weight: 700;
-        letter-spacing: -0.3px;
+    /* 2. CARD FOTO FULL ROUNDED & MENEMPEL RAPI */
+    div[data-testid="column"] {
+        background: transparent;
+        margin-bottom: 16px;
     }
     
-    .social-links a {
-        text-decoration: none;
-        color: #71717a;
-        font-size: 0.8rem;
-        margin-left: 10px;
-        transition: color 0.2s ease;
-    }
-    .social-links a:hover {
-        color: #ff4b4b;
-    }
-
-    /* Rapatkan jarak antara gambar dan checkbox */
     div[data-testid="stImage"] {
         margin-bottom: 0px !important;
     }
+    
+    /* Gambar Full Rounded */
     div[data-testid="stImage"] img {
-        border-radius: 8px 8px 0 0;
+        border-radius: 14px 14px 0 0 !important;
         object-fit: cover;
+        display: block;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
+
+    /* Checkbox & Nama File Menempel Presisi di Bawah Gambar */
     div[data-testid="stCheckbox"] {
         background: rgba(125, 125, 125, 0.06);
-        padding: 8px 12px;
-        border-radius: 0 0 8px 8px;
-        margin-top: -3px !important;
-        margin-bottom: 16px !important;
-        border-left: 1px solid rgba(125, 125, 125, 0.15);
-        border-right: 1px solid rgba(125, 125, 125, 0.15);
-        border-bottom: 1px solid rgba(125, 125, 125, 0.15);
+        padding: 8px 12px !important;
+        border-radius: 0 0 14px 14px !important;
+        margin-top: 0px !important;
+        margin-bottom: 8px !important;
+        border-left: 1px solid rgba(125, 125, 125, 0.12);
+        border-right: 1px solid rgba(125, 125, 125, 0.12);
+        border-bottom: 1px solid rgba(125, 125, 125, 0.12);
     }
+
     div[data-testid="stCheckbox"] label p {
-        font-size: 0.82rem !important;
+        font-size: 0.8rem !important;
         font-weight: 500;
         text-overflow: ellipsis;
         overflow: hidden;
         white-space: nowrap;
     }
 
-    /* Floating Navigation Scroll Buttons */
-    .scroll-nav-container {
+    /* Brand Header */
+    .brand-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+    }
+    .brand-sub {
+        font-size: 0.8rem;
+        color: #71717a;
+    }
+    .social-links a {
+        text-decoration: none;
+        color: #71717a;
+        font-size: 0.82rem;
+        font-weight: 500;
+        margin-left: 12px;
+        transition: color 0.2s ease;
+    }
+    .social-links a:hover {
+        color: #ff4b4b;
+    }
+
+    /* 3. TOMBOL SCROLL INTERAKTIF (FLOATING) */
+    .floating-scroll-nav {
         position: fixed;
         bottom: 85px;
         right: 20px;
+        z-index: 1000;
         display: flex;
         flex-direction: column;
         gap: 8px;
-        z-index: 99998;
     }
     .scroll-btn {
-        width: 40px;
-        height: 40px;
+        width: 42px;
+        height: 42px;
         border-radius: 50%;
-        background: rgba(255, 255, 255, 0.9);
-        border: 1px solid rgba(0, 0, 0, 0.1);
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        background: rgba(255, 255, 255, 0.95);
+        border: 1px solid rgba(0,0,0,0.1);
+        box-shadow: 0 4px 14px rgba(0,0,0,0.12);
         display: flex;
         align-items: center;
         justify-content: center;
-        cursor: pointer;
+        text-decoration: none;
+        color: #1f2937;
         font-size: 1.1rem;
-        transition: transform 0.2s, background 0.2s;
+        cursor: pointer;
+        backdrop-filter: blur(6px);
+        transition: transform 0.2s ease;
     }
     .scroll-btn:hover {
         transform: scale(1.08);
-        background: #ffffff;
+        color: #ff4b4b;
     }
     @media (prefers-color-scheme: dark) {
         .scroll-btn {
-            background: rgba(30, 35, 45, 0.9);
-            border: 1px solid rgba(255, 255, 255, 0.15);
-            color: #fff;
-        }
-        .scroll-btn:hover {
-            background: rgba(45, 50, 65, 1);
-        }
-    }
-
-    /* Floating Bottom Action Bar */
-    .floating-bottom-bar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        z-index: 99997;
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border-top: 1px solid rgba(0, 0, 0, 0.08);
-        padding: 12px 20px;
-        display: flex;
-        justify-content: center;
-    }
-    @media (prefers-color-scheme: dark) {
-        .floating-bottom-bar {
-            background: rgba(14, 17, 23, 0.95);
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: rgba(30, 30, 35, 0.95);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #f3f4f6;
         }
     }
 </style>
+
+<!-- Target Scroll Atas -->
+<div id="top-anchor"></div>
+
+<!-- Tombol Scroll Interaktif Cepat -->
+<div class="floating-scroll-nav">
+    <a href="#top-anchor" class="scroll-btn" title="Kembali ke Atas">↑</a>
+    <a href="#bottom-confirm" class="scroll-btn" title="Langsung ke Konfirmasi">↓</a>
+</div>
 """,
     unsafe_allow_html=True,
 )
 
-# --- 3. PARAMETER DARI URL ---
+# --- 3. PARAMETER URL ---
 query_params = st.query_params.to_dict()
 klien = query_params.get("klien", "Klien Fotonic")
 folder_id = query_params.get("folder_id", None)
@@ -197,7 +201,7 @@ except Exception as e:
   st.stop()
 
 
-# --- 5. AMBIL DATA FOTO ---
+# --- 5. AMBIL DATA FOTO DARI DRIVE ---
 @st.cache_data(ttl=300)
 def get_photos(f_id):
   query = f"'{f_id}' in parents and mimeType contains 'image/' and trashed = false"
@@ -225,63 +229,54 @@ if "terpilih" not in st.session_state:
   st.session_state.terpilih = set()
 
 total_terpilih = len(st.session_state.terpilih)
+
+# --- 7. HEADER BRAND & SOSMED ---
+col_logo, col_social = st.columns([2, 1])
+with col_logo:
+  st.markdown(
+      '<div class="brand-title">📷 Fotonic</div><div class="brand-sub">Photo &'
+      " Video Project</div>",
+      unsafe_allow_html=True,
+  )
+with col_social:
+  st.markdown(
+      """
+    <div class="social-links" style="text-align: right; margin-top: 6px;">
+        <a href="https://instagram.com/fotonicproject" target="_blank">Instagram ↗</a>
+        <a href="https://wa.me/6281234567890" target="_blank">WhatsApp ↗</a>
+    </div>
+    """,
+      unsafe_allow_html=True,
+  )
+
+# --- 8. STICKY PROGRESS BAR (MELAYANG DI ATAS SAAT SCROLL) ---
 rasio = min(total_terpilih / max_foto, 1.0)
 sisa = max_foto - total_terpilih
 status_teks = (
     f"Sisa {sisa} foto lagi"
     if sisa > 0
-    else "Kuota pas! Siap untuk dikonfirmasi."
+    else "Kuota sudah pas! Silakan konfirmasi di bawah."
 )
-color_accent = "#22c55e" if total_terpilih == max_foto else "#ff4b4b"
 
-# --- 7. FIXED TOP STICKY BAR (PROGRES + IDENTITAS + SOSMED) ---
 st.markdown(
     f"""
-<div class="fixed-top-bar">
-    <div style="max-width:1200px; margin:0 auto;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-            <div>
-                <span class="brand-title">📷 Fotonic</span>
-                <span style="font-size:0.75rem; color:#71717a; margin-left:6px;">| {klien}</span>
-            </div>
-            <div class="social-links">
-                <a href="https://instagram.com/fotonicproject" target="_blank">Instagram ↗</a>
-                <a href="https://wa.me/6281234567890" target="_blank">WhatsApp ↗</a>
-            </div>
-        </div>
-        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; font-weight:600; margin-bottom:4px;">
-            <span style="color:#71717a; font-weight:500;">{status_teks}</span>
-            <span style="color:{color_accent};">{total_terpilih} / {max_foto} Foto</span>
-        </div>
-        <div style="width: 100%; background-color: rgba(125,125,125,0.2); border-radius: 999px; height: 5px; overflow: hidden;">
-            <div style="width: {int(rasio * 100)}%; background-color: {color_accent}; height: 100%; transition: width 0.3s ease;"></div>
-        </div>
+<div class="sticky-top-header">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+        <span style="font-size:0.88rem; font-weight:600;">Klien: {klien}</span>
+        <span style="font-size:0.88rem; font-weight:700; color:{'#22c55e' if total_terpilih == max_foto else '#ff4b4b'};">
+            {total_terpilih} / {max_foto} Foto
+        </span>
     </div>
+    <div style="width: 100%; background-color: rgba(125,125,125,0.2); border-radius: 999px; height: 6px; overflow: hidden;">
+        <div style="width: {int(rasio * 100)}%; background-color: {'#22c55e' if total_terpilih == max_foto else '#ff4b4b'}; height: 100%; transition: width 0.3s ease;"></div>
+    </div>
+    <div style="font-size:0.75rem; color:#71717a; margin-top:5px;">{status_teks}</div>
 </div>
 """,
     unsafe_allow_html=True,
 )
 
-# --- 8. FLOATING INTERACTIVE SCROLL BUTTONS (JAVASCRIPT) ---
-components.html(
-    """
-    <div style="position: fixed; bottom: 85px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 999999;">
-        <button onclick="window.parent.scrollTo({top: 0, behavior: 'smooth'});" 
-                title="Gulir ke Atas"
-                style="width: 42px; height: 42px; border-radius: 50%; background: #ffffff; border: 1px solid rgba(0,0,0,0.15); box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;">
-            ▲
-        </button>
-        <button onclick="window.parent.scrollTo({top: window.parent.document.body.scrollHeight, behavior: 'smooth'});" 
-                title="Gulir ke Tombol Konfirmasi"
-                style="width: 42px; height: 42px; border-radius: 50%; background: #ffffff; border: 1px solid rgba(0,0,0,0.15); box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;">
-            ▼
-        </button>
-    </div>
-    """,
-    height=0,
-)
-
-# --- 9. GRID GALERI FOTO ---
+# --- 9. GRID GALERI FOTO (RESPONSIF MOBILE & DESKTOP) ---
 kolom = st.columns(3)
 
 for idx, photo in enumerate(photos):
@@ -308,16 +303,15 @@ for idx, photo in enumerate(photos):
       st.session_state.terpilih.remove(file_name)
       st.rerun()
 
+# --- 10. AREA KONFIRMASI AKHIR (TARGET ANCHOR SCROLL) ---
+st.markdown('<div id="bottom-confirm"></div>', unsafe_allow_html=True)
 st.divider()
 
-# --- 10. TOMBOL KONFIRMASI AKHIR ---
-submit_clicked = st.button(
+if st.button(
     f"Kunci & Kirim Pilihan ({total_terpilih}/{max_foto})",
     type="primary",
     use_container_width=True,
-)
-
-if submit_clicked:
+):
   if total_terpilih < max_foto:
     st.warning(
         f"Pilihan Anda belum lengkap. Silakan pilih {max_foto - total_terpilih}"
