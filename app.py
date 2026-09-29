@@ -12,96 +12,63 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# --- 2. CSS STYLING & INTERAKTIVITAS SCROLL ---
+# --- 2. CSS STYLING (FIXED HEADER, BOTTOM CONFIRM, & ALL-ROUND CARDS) ---
 st.markdown(
     """
 <style>
-    /* Sembunyikan default Streamlit header & footer */
-    header {visibility: hidden;}
-    footer {visibility: hidden;}
+    /* Sembunyikan elemen bawaan Streamlit */
+    header {visibility: hidden !important;}
+    footer {visibility: hidden !important;}
     
+    /* Ruang kosong atas dan bawah agar konten foto tidak tertutup bar melayang */
     .block-container {
-        padding-top: 1rem !important;
-        padding-bottom: 6rem !important;
+        padding-top: 140px !important;
+        padding-bottom: 110px !important;
         max-width: 1200px !important;
     }
 
-    /* 1. STICKY PROGRESS BAR ATAS */
-    .sticky-top-header {
-        position: -webkit-sticky;
-        position: sticky;
-        top: 0.5rem;
-        z-index: 999;
-        background: rgba(255, 255, 255, 0.94);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        padding: 12px 18px;
-        margin-bottom: 24px;
-        border-radius: 16px;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+    /* 1. STICKY / FIXED TOP HEADER (MELAYANG TETAP DI ATAS) */
+    .fixed-top-header {
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        z-index: 99999 !important;
+        background: rgba(255, 255, 255, 0.96) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        padding: 12px 24px !important;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
     }
     
     @media (prefers-color-scheme: dark) {
-        .sticky-top-header {
-            background: rgba(18, 18, 20, 0.94);
-            border: 1px solid rgba(255, 255, 255, 0.12);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+        .fixed-top-header {
+            background: rgba(18, 18, 20, 0.96) !important;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4) !important;
         }
     }
 
-    /* 2. CARD FOTO FULL ROUNDED & MENEMPEL RAPI */
-    div[data-testid="column"] {
-        background: transparent;
-        margin-bottom: 16px;
-    }
-    
-    div[data-testid="stImage"] {
-        margin-bottom: 0px !important;
-    }
-    
-    /* Gambar Full Rounded */
-    div[data-testid="stImage"] img {
-        border-radius: 14px 14px 0 0 !important;
-        object-fit: cover;
-        display: block;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    .header-inner {
+        max-width: 1150px;
+        margin: 0 auto;
     }
 
-    /* Checkbox & Nama File Menempel Presisi di Bawah Gambar */
-    div[data-testid="stCheckbox"] {
-        background: rgba(125, 125, 125, 0.06);
-        padding: 8px 12px !important;
-        border-radius: 0 0 14px 14px !important;
-        margin-top: 0px !important;
-        margin-bottom: 8px !important;
-        border-left: 1px solid rgba(125, 125, 125, 0.12);
-        border-right: 1px solid rgba(125, 125, 125, 0.12);
-        border-bottom: 1px solid rgba(125, 125, 125, 0.12);
-    }
-
-    div[data-testid="stCheckbox"] label p {
-        font-size: 0.8rem !important;
-        font-weight: 500;
-        text-overflow: ellipsis;
-        overflow: hidden;
-        white-space: nowrap;
-    }
-
-    /* Brand Header */
     .brand-title {
-        font-size: 1.3rem;
+        font-size: 1.15rem;
         font-weight: 700;
         letter-spacing: -0.5px;
     }
     .brand-sub {
-        font-size: 0.8rem;
+        font-size: 0.75rem;
         color: #71717a;
     }
     .social-links a {
         text-decoration: none;
         color: #71717a;
-        font-size: 0.82rem;
+        font-size: 0.8rem;
         font-weight: 500;
         margin-left: 12px;
         transition: color 0.2s ease;
@@ -110,54 +77,107 @@ st.markdown(
         color: #ff4b4b;
     }
 
-    /* 3. TOMBOL SCROLL INTERAKTIF (FLOATING) */
-    .floating-scroll-nav {
-        position: fixed;
-        bottom: 85px;
-        right: 20px;
-        z-index: 1000;
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
+    /* 2. SCROLL INTERAKTIF DI SISI KANAN (TEBAL & MUDAH DISERET) */
+    ::-webkit-scrollbar {
+        width: 12px !important;
+        display: block !important;
     }
-    .scroll-btn {
-        width: 42px;
-        height: 42px;
-        border-radius: 50%;
-        background: rgba(255, 255, 255, 0.95);
-        border: 1px solid rgba(0,0,0,0.1);
-        box-shadow: 0 4px 14px rgba(0,0,0,0.12);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-decoration: none;
-        color: #1f2937;
-        font-size: 1.1rem;
-        cursor: pointer;
-        backdrop-filter: blur(6px);
-        transition: transform 0.2s ease;
+    ::-webkit-scrollbar-track {
+        background: rgba(125, 125, 125, 0.08) !important;
+        border-left: 1px solid rgba(125, 125, 125, 0.1) !important;
     }
-    .scroll-btn:hover {
-        transform: scale(1.08);
-        color: #ff4b4b;
+    ::-webkit-scrollbar-thumb {
+        background: #ff4b4b !important;
+        border-radius: 8px !important;
+        border: 2px solid rgba(255, 255, 255, 0.9) !important;
+    }
+    ::-webkit-scrollbar-thumb:hover {
+        background: #dc2626 !important;
     }
     @media (prefers-color-scheme: dark) {
-        .scroll-btn {
-            background: rgba(30, 30, 35, 0.95);
-            border: 1px solid rgba(255,255,255,0.15);
-            color: #f3f4f6;
+        ::-webkit-scrollbar-thumb {
+            border: 2px solid rgba(18, 18, 20, 0.9) !important;
         }
     }
+
+    /* 3. KARTU FOTO ALL-ROUND & MERAPATKAN CELAH NAMA + CHECKBOX */
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        border-radius: 16px !important;
+        overflow: hidden !important;
+        border: 1px solid rgba(125, 125, 125, 0.2) !important;
+        background: rgba(125, 125, 125, 0.03) !important;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+        margin-bottom: 16px !important;
+        padding: 0 !important;
+    }
+    div[data-testid="stVerticalBlockBorderWrapper"] > div {
+        padding: 0px !important;
+        gap: 0px !important;
+    }
+    div[data-testid="stVerticalBlockBorderWrapper"] img {
+        border-radius: 16px 16px 0 0 !important;
+        display: block !important;
+        width: 100% !important;
+        object-fit: cover !important;
+    }
+    div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stCheckbox"] {
+        padding: 8px 12px !important;
+        margin: 0px !important;
+        border-top: 1px solid rgba(125, 125, 125, 0.12) !important;
+        background: rgba(125, 125, 125, 0.04) !important;
+    }
+    div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stCheckbox"] label {
+        gap: 8px !important;
+        display: flex !important;
+        align-items: center !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+    div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stCheckbox"] label p {
+        font-size: 0.8rem !important;
+        font-weight: 500 !important;
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
+        margin: 0 !important;
+    }
+
+    /* 4. FIXED BOTTOM BAR (TOMBOL KONFIRMASI MELAYANG DI BAWAH) */
+    div[data-testid="stAppViewContainer"] .stButton {
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        width: 100% !important;
+        z-index: 99998 !important;
+        background: rgba(255, 255, 255, 0.95) !important;
+        backdrop-filter: blur(12px) !important;
+        -webkit-backdrop-filter: blur(12px) !important;
+        padding: 12px 20px !important;
+        border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
+        box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.05) !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+    @media (prefers-color-scheme: dark) {
+        div[data-testid="stAppViewContainer"] .stButton {
+            background: rgba(18, 18, 20, 0.95) !important;
+            border-top: 1px solid rgba(255, 255, 255, 0.12) !important;
+            box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.35) !important;
+        }
+    }
+    div[data-testid="stAppViewContainer"] .stButton > button {
+        max-width: 600px !important;
+        width: 100% !important;
+        margin: 0 auto !important;
+        height: 46px !important;
+        border-radius: 12px !important;
+        font-size: 0.95rem !important;
+        font-weight: 600 !important;
+        box-shadow: 0 4px 12px rgba(255, 75, 75, 0.25) !important;
+    }
 </style>
-
-<!-- Target Scroll Atas -->
-<div id="top-anchor"></div>
-
-<!-- Tombol Scroll Interaktif Cepat -->
-<div class="floating-scroll-nav">
-    <a href="#top-anchor" class="scroll-btn" title="Kembali ke Atas">↑</a>
-    <a href="#bottom-confirm" class="scroll-btn" title="Langsung ke Konfirmasi">↓</a>
-</div>
 """,
     unsafe_allow_html=True,
 )
@@ -230,83 +250,73 @@ if "terpilih" not in st.session_state:
 
 total_terpilih = len(st.session_state.terpilih)
 
-# --- 7. HEADER BRAND & SOSMED ---
-col_logo, col_social = st.columns([2, 1])
-with col_logo:
-  st.markdown(
-      '<div class="brand-title">📷 Fotonic</div><div class="brand-sub">Photo &'
-      " Video Project</div>",
-      unsafe_allow_html=True,
-  )
-with col_social:
-  st.markdown(
-      """
-    <div class="social-links" style="text-align: right; margin-top: 6px;">
-        <a href="https://instagram.com/fotonicproject" target="_blank">Instagram ↗</a>
-        <a href="https://wa.me/6281234567890" target="_blank">WhatsApp ↗</a>
-    </div>
-    """,
-      unsafe_allow_html=True,
-  )
-
-# --- 8. STICKY PROGRESS BAR (MELAYANG DI ATAS SAAT SCROLL) ---
+# --- 7. STICKY TOP HEADER HTML (BRAND, SOSMED, & PROGRESS) ---
 rasio = min(total_terpilih / max_foto, 1.0)
 sisa = max_foto - total_terpilih
 status_teks = (
     f"Sisa {sisa} foto lagi"
     if sisa > 0
-    else "Kuota sudah pas! Silakan konfirmasi di bawah."
+    else "Kuota pas! Siap dikirim di bagian bawah."
 )
 
 st.markdown(
     f"""
-<div class="sticky-top-header">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-        <span style="font-size:0.88rem; font-weight:600;">Klien: {klien}</span>
-        <span style="font-size:0.88rem; font-weight:700; color:{'#22c55e' if total_terpilih == max_foto else '#ff4b4b'};">
-            {total_terpilih} / {max_foto} Foto
-        </span>
+<div class="fixed-top-header">
+    <div class="header-inner">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+            <div>
+                <span class="brand-title">📷 Fotonic</span>
+                <span class="brand-sub" style="margin-left:8px;">Photo & Video Project</span>
+            </div>
+            <div class="social-links">
+                <a href="https://instagram.com/fotonicproject" target="_blank">Instagram ↗</a>
+                <a href="https://wa.me/6281234567890" target="_blank">WhatsApp ↗</a>
+            </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <span style="font-size:0.85rem; font-weight:600;">Klien: {klien}</span>
+            <span style="font-size:0.85rem; font-weight:700; color:{'#22c55e' if total_terpilih == max_foto else '#ff4b4b'};">
+                {total_terpilih} / {max_foto} Foto
+            </span>
+        </div>
+        <div style="width: 100%; background-color: rgba(125,125,125,0.2); border-radius: 999px; height: 5px; overflow: hidden;">
+            <div style="width: {int(rasio * 100)}%; background-color: {'#22c55e' if total_terpilih == max_foto else '#ff4b4b'}; height: 100%; transition: width 0.3s ease;"></div>
+        </div>
     </div>
-    <div style="width: 100%; background-color: rgba(125,125,125,0.2); border-radius: 999px; height: 6px; overflow: hidden;">
-        <div style="width: {int(rasio * 100)}%; background-color: {'#22c55e' if total_terpilih == max_foto else '#ff4b4b'}; height: 100%; transition: width 0.3s ease;"></div>
-    </div>
-    <div style="font-size:0.75rem; color:#71717a; margin-top:5px;">{status_teks}</div>
 </div>
 """,
     unsafe_allow_html=True,
 )
 
-# --- 9. GRID GALERI FOTO (RESPONSIF MOBILE & DESKTOP) ---
+# --- 8. GRID GALERI FOTO (ALL-ROUND CARDS) ---
 kolom = st.columns(3)
 
 for idx, photo in enumerate(photos):
   with kolom[idx % 3]:
-    img_url = f"https://lh3.googleusercontent.com/d/{photo['id']}"
-    file_name = photo["name"]
+    with st.container(border=True):
+      img_url = f"https://lh3.googleusercontent.com/d/{photo['id']}"
+      file_name = photo["name"]
 
-    st.image(img_url, use_container_width=True)
+      st.image(img_url, use_container_width=True)
 
-    is_checked = file_name in st.session_state.terpilih
-    is_disabled = (total_terpilih >= max_foto) and not is_checked
+      is_checked = file_name in st.session_state.terpilih
+      is_disabled = (total_terpilih >= max_foto) and not is_checked
 
-    cek = st.checkbox(
-        f"{file_name}",
-        value=is_checked,
-        key=photo["id"],
-        disabled=is_disabled,
-    )
+      cek = st.checkbox(
+          f"{file_name}",
+          value=is_checked,
+          key=photo["id"],
+          disabled=is_disabled,
+      )
 
-    if cek and file_name not in st.session_state.terpilih:
-      st.session_state.terpilih.add(file_name)
-      st.rerun()
-    elif not cek and file_name in st.session_state.terpilih:
-      st.session_state.terpilih.remove(file_name)
-      st.rerun()
+      if cek and file_name not in st.session_state.terpilih:
+        st.session_state.terpilih.add(file_name)
+        st.rerun()
+      elif not cek and file_name in st.session_state.terpilih:
+        st.session_state.terpilih.remove(file_name)
+        st.rerun()
 
-# --- 10. AREA KONFIRMASI AKHIR (TARGET ANCHOR SCROLL) ---
-st.markdown('<div id="bottom-confirm"></div>', unsafe_allow_html=True)
-st.divider()
-
+# --- 9. TOMBOL SUBMIT (FIXED BOTTOM BAR) ---
 if st.button(
     f"Kunci & Kirim Pilihan ({total_terpilih}/{max_foto})",
     type="primary",
@@ -326,11 +336,11 @@ if st.button(
           [waktu, klien, "Selesai", total_terpilih, daftar_file_str]
       )
       st.success(
-          f"Terima kasih {klien}! Pilihan {max_foto} foto berhasil dikonfirmasi"
-          " dan dikirim."
+          f"Terima kasih {klien}! Pilihan {max_foto} foto berhasil dikirim ke"
+          " Fotonic."
       )
       st.balloons()
       st.markdown("### Daftar Foto Terpilih:")
       st.code(daftar_file_str, language="text")
     except Exception as e:
-      st.error(f"Gagal mencatat ke sistem Sheets: {e}")
+      st.error(f"Gagal mencatat ke Google Sheets: {e}")
