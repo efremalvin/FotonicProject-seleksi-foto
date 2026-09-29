@@ -3,6 +3,7 @@ from google.oauth2 import service_account
 from googleapiclient.discovery import build
 import gspread
 import streamlit as st
+import streamlit.components.v1 as components
 
 # --- 1. KONFIGURASI HALAMAN ---
 st.set_page_config(
@@ -12,53 +13,54 @@ st.set_page_config(
     initial_sidebar_state="collapsed",
 )
 
-# --- 2. CSS STYLING (MINIMALIS & RESPONSIVE UX) ---
+# --- 2. CSS STYLING & FLOATING CONTROLS ---
 st.markdown(
     """
 <style>
-    /* Sembunyikan default header streamlit agar clean */
-    header {visibility: hidden;}
+    /* Hilangkan header default streamlit */
+    header[data-testid="stHeader"] {display: none !important;}
+    
+    /* Beri ruang atas dan bawah agar konten tidak tertutup fixed bar */
     .block-container {
-        padding-top: 1.5rem !important;
-        padding-bottom: 7rem !important;
+        padding-top: 5.5rem !important;
+        padding-bottom: 7.5rem !important;
+        max-width: 1200px;
     }
 
-    /* Top Sticky Bar: Progress Seleksi */
-    .sticky-progress-container {
-        position: -webkit-sticky;
-        position: sticky;
+    /* Fixed Top Sticky Progress Bar */
+    .fixed-top-bar {
+        position: fixed;
         top: 0;
-        z-index: 999;
-        background: rgba(255, 255, 255, 0.92);
-        backdrop-filter: blur(8px);
-        padding: 12px 16px;
-        margin-bottom: 20px;
-        border-radius: 12px;
-        border: 1px solid rgba(0, 0, 0, 0.08);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        left: 0;
+        right: 0;
+        z-index: 99999;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+        padding: 10px 20px;
     }
-    
-    /* Support dark mode pada Streamlit */
+
     @media (prefers-color-scheme: dark) {
-        .sticky-progress-container {
-            background: rgba(14, 17, 23, 0.92);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        .fixed-top-bar {
+            background: rgba(14, 17, 23, 0.95);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
         }
     }
 
     .brand-title {
-        font-size: 1.4rem;
+        font-size: 1.1rem;
         font-weight: 700;
-        letter-spacing: -0.5px;
-        margin-bottom: 2px;
+        letter-spacing: -0.3px;
     }
     
     .social-links a {
         text-decoration: none;
         color: #71717a;
-        font-size: 0.85rem;
-        margin-right: 12px;
+        font-size: 0.8rem;
+        margin-left: 10px;
         transition: color 0.2s ease;
     }
     .social-links a:hover {
@@ -74,11 +76,11 @@ st.markdown(
         object-fit: cover;
     }
     div[data-testid="stCheckbox"] {
-        background: rgba(125, 125, 125, 0.05);
-        padding: 6px 10px;
+        background: rgba(125, 125, 125, 0.06);
+        padding: 8px 12px;
         border-radius: 0 0 8px 8px;
-        margin-top: -4px !important;
-        margin-bottom: 18px !important;
+        margin-top: -3px !important;
+        margin-bottom: 16px !important;
         border-left: 1px solid rgba(125, 125, 125, 0.15);
         border-right: 1px solid rgba(125, 125, 125, 0.15);
         border-bottom: 1px solid rgba(125, 125, 125, 0.15);
@@ -91,23 +93,63 @@ st.markdown(
         white-space: nowrap;
     }
 
-    /* Floating Action Bar untuk tombol submit */
-    .floating-submit-wrapper {
+    /* Floating Navigation Scroll Buttons */
+    .scroll-nav-container {
+        position: fixed;
+        bottom: 85px;
+        right: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        z-index: 99998;
+    }
+    .scroll-btn {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        font-size: 1.1rem;
+        transition: transform 0.2s, background 0.2s;
+    }
+    .scroll-btn:hover {
+        transform: scale(1.08);
+        background: #ffffff;
+    }
+    @media (prefers-color-scheme: dark) {
+        .scroll-btn {
+            background: rgba(30, 35, 45, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: #fff;
+        }
+        .scroll-btn:hover {
+            background: rgba(45, 50, 65, 1);
+        }
+    }
+
+    /* Floating Bottom Action Bar */
+    .floating-bottom-bar {
         position: fixed;
         bottom: 0;
         left: 0;
         right: 0;
-        z-index: 998;
-        padding: 14px 20px;
-        background: rgba(255, 255, 255, 0.9);
-        backdrop-filter: blur(8px);
+        z-index: 99997;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
         border-top: 1px solid rgba(0, 0, 0, 0.08);
+        padding: 12px 20px;
         display: flex;
         justify-content: center;
     }
     @media (prefers-color-scheme: dark) {
-        .floating-submit-wrapper {
-            background: rgba(14, 17, 23, 0.9);
+        .floating-bottom-bar {
+            background: rgba(14, 17, 23, 0.95);
             border-top: 1px solid rgba(255, 255, 255, 0.1);
         }
     }
@@ -183,28 +225,6 @@ if "terpilih" not in st.session_state:
   st.session_state.terpilih = set()
 
 total_terpilih = len(st.session_state.terpilih)
-
-# --- 7. HEADER BRAND & SOSMED ---
-col_logo, col_social = st.columns([2, 1])
-with col_logo:
-  st.markdown(
-      '<div class="brand-title">📷 Fotonic</div><div style="font-size:0.85rem;'
-      ' color:#71717a;">Photo & Video Project</div>',
-      unsafe_allow_html=True,
-  )
-with col_social:
-  # Ubah tautan sesuai username Instagram & nomor WhatsApp Fotonic
-  st.markdown(
-      """
-    <div class="social-links" style="text-align: right; margin-top: 6px;">
-        <a href="https://instagram.com/fotonicproject" target="_blank">Instagram ↗</a>
-        <a href="https://wa.me/6281234567890" target="_blank">WhatsApp ↗</a>
-    </div>
-    """,
-      unsafe_allow_html=True,
-  )
-
-# --- 8. STICKY PROGRESS BAR ---
 rasio = min(total_terpilih / max_foto, 1.0)
 sisa = max_foto - total_terpilih
 status_teks = (
@@ -212,26 +232,56 @@ status_teks = (
     if sisa > 0
     else "Kuota pas! Siap untuk dikonfirmasi."
 )
+color_accent = "#22c55e" if total_terpilih == max_foto else "#ff4b4b"
 
+# --- 7. FIXED TOP STICKY BAR (PROGRES + IDENTITAS + SOSMED) ---
 st.markdown(
     f"""
-<div class="sticky-progress-container">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-        <span style="font-size:0.88rem; font-weight:600;">Seleksi untuk: {klien}</span>
-        <span style="font-size:0.88rem; font-weight:700; color:{'#22c55e' if total_terpilih == max_foto else '#ff4b4b'};">
-            {total_terpilih} / {max_foto} Foto
-        </span>
+<div class="fixed-top-bar">
+    <div style="max-width:1200px; margin:0 auto;">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+            <div>
+                <span class="brand-title">📷 Fotonic</span>
+                <span style="font-size:0.75rem; color:#71717a; margin-left:6px;">| {klien}</span>
+            </div>
+            <div class="social-links">
+                <a href="https://instagram.com/fotonicproject" target="_blank">Instagram ↗</a>
+                <a href="https://wa.me/6281234567890" target="_blank">WhatsApp ↗</a>
+            </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.8rem; font-weight:600; margin-bottom:4px;">
+            <span style="color:#71717a; font-weight:500;">{status_teks}</span>
+            <span style="color:{color_accent};">{total_terpilih} / {max_foto} Foto</span>
+        </div>
+        <div style="width: 100%; background-color: rgba(125,125,125,0.2); border-radius: 999px; height: 5px; overflow: hidden;">
+            <div style="width: {int(rasio * 100)}%; background-color: {color_accent}; height: 100%; transition: width 0.3s ease;"></div>
+        </div>
     </div>
-    <div style="width: 100%; background-color: rgba(125,125,125,0.2); border-radius: 999px; height: 6px; overflow: hidden;">
-        <div style="width: {int(rasio * 100)}%; background-color: {'#22c55e' if total_terpilih == max_foto else '#ff4b4b'}; height: 100%; transition: width 0.3s ease;"></div>
-    </div>
-    <div style="font-size:0.75rem; color:#71717a; margin-top:4px;">{status_teks}</div>
 </div>
 """,
     unsafe_allow_html=True,
 )
 
-# --- 9. GALERI FOTO (GRID 3 KOLOM DESKTOP, RESPONSIF DI HP) ---
+# --- 8. FLOATING INTERACTIVE SCROLL BUTTONS (JAVASCRIPT) ---
+components.html(
+    """
+    <div style="position: fixed; bottom: 85px; right: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 999999;">
+        <button onclick="window.parent.scrollTo({top: 0, behavior: 'smooth'});" 
+                title="Gulir ke Atas"
+                style="width: 42px; height: 42px; border-radius: 50%; background: #ffffff; border: 1px solid rgba(0,0,0,0.15); box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;">
+            ▲
+        </button>
+        <button onclick="window.parent.scrollTo({top: window.parent.document.body.scrollHeight, behavior: 'smooth'});" 
+                title="Gulir ke Tombol Konfirmasi"
+                style="width: 42px; height: 42px; border-radius: 50%; background: #ffffff; border: 1px solid rgba(0,0,0,0.15); box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer; font-size: 1.1rem; display: flex; align-items: center; justify-content: center;">
+            ▼
+        </button>
+    </div>
+    """,
+    height=0,
+)
+
+# --- 9. GRID GALERI FOTO ---
 kolom = st.columns(3)
 
 for idx, photo in enumerate(photos):
@@ -260,12 +310,14 @@ for idx, photo in enumerate(photos):
 
 st.divider()
 
-# --- 10. TOMBOL SUBMIT / KONFIRMASI AKHIR ---
-if st.button(
+# --- 10. TOMBOL KONFIRMASI AKHIR ---
+submit_clicked = st.button(
     f"Kunci & Kirim Pilihan ({total_terpilih}/{max_foto})",
     type="primary",
     use_container_width=True,
-):
+)
+
+if submit_clicked:
   if total_terpilih < max_foto:
     st.warning(
         f"Pilihan Anda belum lengkap. Silakan pilih {max_foto - total_terpilih}"
