@@ -41,7 +41,7 @@ st.markdown(
     footer {{visibility: hidden !important;}}
     
     .block-container {{
-        padding-top: 150px !important; /* Memberi ruang agar tidak tertutup header fixed */
+        padding-top: 40px !important; /* Jarak wajar dari atas */
         padding-bottom: 120px !important;
         max-width: 1200px !important;
     }}
@@ -58,17 +58,14 @@ st.markdown(
     .fallback-logo {{ font-size: 2rem; font-weight: bold; text-align: center; line-height: 1.1; }}
     .fallback-logo span {{ font-size: 1rem; font-weight: normal; color: #71717a; }}
     
-    /* HEADER LOGO 1 */
+    /* HEADER LOGO 1 (SUDAH DIPERBAIKI AGAR TIDAK NABRAK FOTO) */
     .header-logo-1 {{
-        position: absolute;
-        top: 20px;
-        left: 0;
-        right: 0;
         text-align: center;
-        z-index: 1;
+        padding-bottom: 40px;
+        padding-top: 40px;
     }}
 
-    /* HEADER FIXED (MENGAMBANG TETAP DI ATAS) */
+    /* HEADER FIXED (MENGAMBANG TETAP DI ATAS DENGAN LENGKUNGAN 60PX) */
     .fixed-top-header {{
         position: fixed !important;
         top: 16px !important;
@@ -81,7 +78,7 @@ st.markdown(
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
         padding: 16px 24px !important;
-        border-radius: 24px !important; /* LENGKUNGAN 24PX */
+        border-radius: 60px !important; /* DISAMAKAN DENGAN KARTU 60px */
         border: 1px solid rgba(0, 0, 0, 0.08) !important;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
     }}
@@ -96,28 +93,28 @@ st.markdown(
     ::-webkit-scrollbar {{ width: 8px !important; }}
     ::-webkit-scrollbar-thumb {{ background: #ff4b4b !important; border-radius: 8px !important; }}
 
-    /* KARTU FOTO PRESISI (24px LUAR, 12px DALAM) */
+    /* KARTU FOTO PRESISI (60px LUAR, 48px DALAM) */
     div[data-testid="stVerticalBlockBorderWrapper"] {{
-        border-radius: 24px !important; /* LENGKUNGAN SAMA DENGAN HEADER */
-        padding: 12px !important;
+        border-radius: 60px !important; /* LUAR 60px */
+        padding: 12px !important; /* PADDING 12px */
         background: rgba(125, 125, 125, 0.04) !important;
         border: 1px solid rgba(125, 125, 125, 0.1) !important;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03) !important;
         margin-bottom: 20px !important;
     }}
     div[data-testid="stVerticalBlockBorderWrapper"] img {{
-        border-radius: 12px !important; /* Presisi matematis agar tidak belang (24px - 12px padding) */
+        border-radius: 48px !important; /* DALAM = 60px - 12px padding = 48px */
         width: 100% !important;
         object-fit: cover !important;
     }}
     div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stCheckbox"] {{
         background: transparent !important;
         border: none !important;
-        padding: 16px 12px 4px 12px !important;
+        padding: 16px 16px 4px 16px !important;
         margin: 0 !important;
     }}
     div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stCheckbox"] label p {{
-        font-size: 0.9rem !important;
+        font-size: 0.95rem !important;
         font-weight: 600 !important;
     }}
 
@@ -215,11 +212,11 @@ if "terpilih" not in st.session_state:
 
 total_terpilih = len(st.session_state.terpilih)
 
+# TARGET ANCHOR TOP UNTUK JS
+st.markdown('<div id="anchor-top" style="height: 1px;"></div>', unsafe_allow_html=True)
+
 # --- 4. TAMPILAN HEADER LOGO 1 ---
 st.markdown(f'<div class="header-logo-1">{img1_light}{img1_dark}</div>', unsafe_allow_html=True)
-
-# TARGET ANCHOR TOP UNTUK JS
-st.markdown('<div id="anchor-top" style="height: 10px; margin-top: 50px;"></div>', unsafe_allow_html=True)
 
 # --- 5. TAMPILAN FIXED HEADER ---
 rasio = min(total_terpilih / max_foto, 1.0)
@@ -274,18 +271,16 @@ components.html("""
     try {
         const parentDoc = window.parent.document;
         
-        // 1. Observer untuk Header Logo (Saat mulai scroll ke bawah dari posisi paling atas)
+        // 1. Observer untuk Header Logo
         const topAnchor = parentDoc.getElementById('anchor-top');
         const logo2 = parentDoc.getElementById('logo2-container');
         
         if (topAnchor && logo2) {
             const observerTop = new IntersectionObserver((entries) => {
                 if(entries[0].isIntersecting) {
-                    // Sedang di paling atas
                     logo2.style.opacity = '0';
                     logo2.style.transform = 'translateY(10px)';
                 } else {
-                    // Sudah scroll ke bawah
                     logo2.style.opacity = '1';
                     logo2.style.transform = 'translateY(0)';
                 }
@@ -293,17 +288,15 @@ components.html("""
             observerTop.observe(topAnchor);
         }
         
-        // 2. Observer untuk Footer Tombol (Saat mentok di akhir galeri)
+        // 2. Observer untuk Footer Tombol
         const bottomAnchor = parentDoc.getElementById('anchor-bottom');
         const btn = parentDoc.querySelector('div[data-testid="stButton"]');
         
         if (bottomAnchor && btn) {
             const observerBottom = new IntersectionObserver((entries) => {
                 if(entries[0].isIntersecting) {
-                    // Sedang mentok di bawah (tombol memanjang)
                     btn.classList.remove('fab-mode');
                 } else {
-                    // Masih di tengah galeri (tombol mengecil jadi bubble)
                     btn.classList.add('fab-mode');
                 }
             }, { rootMargin: "150px" });
