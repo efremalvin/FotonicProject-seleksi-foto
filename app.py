@@ -27,7 +27,7 @@ w1 = get_b64("whitelogo1.png")
 b2 = get_b64("blacklogo2.png")
 w2 = get_b64("whitelogo2.png")
 
-# HTML Fallback jika logo tidak ditemukan
+# HTML Fallback jika logo belum ditemukan
 img1_light = f'<img src="{b1}" class="img-light logo1-size">' if b1 else '<div class="img-light fallback-logo">Fotonic<br><span>Photo & Video Project</span></div>'
 img1_dark  = f'<img src="{w1}" class="img-dark logo1-size">' if w1 else '<div class="img-dark fallback-logo">Fotonic<br><span>Photo & Video Project</span></div>'
 img2_light = f'<img src="{b2}" class="img-light logo2-size">' if b2 else '<span class="img-light" style="font-size:1.5rem;">📷</span>'
@@ -65,6 +65,14 @@ st.markdown(
         padding-top: 10px;
     }}
 
+    /* TRIK MEMAKSA WRAPPER STREAMLIT MENJADI STICKY */
+    div[data-testid="stVerticalBlock"] > div:has(.sticky-header) {{
+        position: -webkit-sticky !important;
+        position: sticky !important;
+        top: 16px !important;
+        z-index: 99990 !important;
+    }}
+
     /* HEADER STICKY (LENGKUNGAN 24PX) */
     .sticky-header {{
         position: -webkit-sticky !important;
@@ -75,7 +83,7 @@ st.markdown(
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
         padding: 16px 24px !important;
-        border-radius: 24px !important;
+        border-radius: 24px !important; /* DISAMAKAN DENGAN KARTU */
         border: 1px solid rgba(0, 0, 0, 0.08) !important;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
         margin-bottom: 24px;
@@ -87,46 +95,31 @@ st.markdown(
         }}
     }}
     
-    /* SCROLLBAR */
+    /* SCROLLBAR KANAN */
     ::-webkit-scrollbar {{ width: 8px !important; }}
     ::-webkit-scrollbar-thumb {{ background: #ff4b4b !important; border-radius: 8px !important; }}
 
-    /* KARTU LUAR FOTO (LENGKUNGAN 24PX IDENTIK DENGAN HEADER) */
+    /* KARTU FOTO PRESISI (24px LUAR, 12px DALAM) */
     div[data-testid="stVerticalBlockBorderWrapper"] {{
-        border-radius: 24px !important;
-        padding: 12px !important;
+        border-radius: 24px !important; /* LUAR 24px SAMA DENGAN HEADER */
+        padding: 12px !important; /* PADDING 12px */
         background: rgba(125, 125, 125, 0.04) !important;
         border: 1px solid rgba(125, 125, 125, 0.2) !important;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03) !important;
         margin-bottom: 20px !important;
-        overflow: hidden !important;
     }}
     div[data-testid="stVerticalBlockBorderWrapper"] > div {{
         padding: 0 !important;
-        border-radius: 24px !important;
     }}
-
-    /* KONTROL LENGKUNGAN FOTO DI DALAM (TARGET LENGKAP SEMUA LAPISAN) */
-    div[data-testid="stImage"] {{
-        border-radius: 12px !important;
-        overflow: hidden !important;
-        line-height: 0 !important;
-    }}
-    div[data-testid="stImage"] img,
-    div[data-testid="stImage"] > div,
-    div[data-testid="stImage"] picture {{
-        border-radius: 12px !important;
-        overflow: hidden !important;
+    div[data-testid="stVerticalBlockBorderWrapper"] img {{
+        border-radius: 12px !important; /* DALAM 12px BINGKAI PRESISI */
         width: 100% !important;
         object-fit: cover !important;
-        display: block !important;
     }}
-
-    /* CHECKBOX & NAMA FILE */
     div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stCheckbox"] {{
         background: transparent !important;
         border: none !important;
-        padding: 14px 8px 4px 8px !important;
+        padding: 16px 12px 4px 12px !important;
         margin: 0 !important;
     }}
     div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stCheckbox"] label p {{
@@ -134,13 +127,13 @@ st.markdown(
         font-weight: 600 !important;
     }}
 
-    /* TOMBOL KIRI SIMPEL (50% LAYAR) */
+    /* FOOTER TOMBOL KIRI (SIMPEL, 50% HALAMAN, TANPA 0/15) */
     div[data-testid="stButton"] {{
         position: fixed !important;
         z-index: 99998 !important;
         bottom: 24px !important;
         left: 24px !important;
-        width: 50% !important;
+        width: 50% !important; /* SETENGAH HALAMAN KIRI */
         max-width: 400px !important;
     }}
     div[data-testid="stButton"] button {{
@@ -153,20 +146,21 @@ st.markdown(
         box-shadow: 0 6px 16px rgba(255, 75, 75, 0.25) !important;
     }}
     
-    /* EFEK TRANSISI LOGO 2 PADA HEADER */
+    /* EFEK EKPANSI LOGO 2 PADA HEADER SAAT SCROLL */
     #logo2-container {{
         display: flex;
         align-items: center;
         gap: 12px;
+        max-width: 0px; /* Menyembunyikan lebar di awal */
         opacity: 0;
+        overflow: hidden;
         transform: translateX(-15px);
-        visibility: hidden;
-        transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s;
+        transition: all 0.4s ease;
     }}
     #logo2-container.show {{
+        max-width: 200px; /* Terekspansi saat Logo 1 hilang */
         opacity: 1;
         transform: translateX(0);
-        visibility: visible;
     }}
 </style>
 """,
@@ -219,7 +213,7 @@ total_terpilih = len(st.session_state.terpilih)
 # --- 4. TAMPILAN HEADER LOGO 1 ---
 st.markdown(f'<div id="logo1-wrapper" class="header-logo-1">{img1_light}{img1_dark}</div>', unsafe_allow_html=True)
 
-# --- 5. TAMPILAN STICKY HEADER ---
+# --- 5. TAMPILAN STICKY HEADER (DIBUAT 1 BARIS AGAR TIDAK BOCOR) ---
 rasio = min(total_terpilih / max_foto, 1.0)
 warna_progres = '#22c55e' if total_terpilih == max_foto else '#ff4b4b'
 lebar_progres = int(rasio * 100)
@@ -247,7 +241,7 @@ for idx, photo in enumerate(photos):
                 st.session_state.terpilih.remove(file_name)
                 st.rerun()
 
-# --- 7. FOOTER KONFIRMASI ---
+# --- 7. FOOTER KONFIRMASI (TOMBOL KIRI SIMPEL TANPA 0/15) ---
 if st.button("Kunci & Kirim", type="primary", use_container_width=True):
     if total_terpilih < max_foto:
         st.warning(f"Pilihan belum lengkap. Kurang {max_foto - total_terpilih} foto lagi.")
@@ -262,19 +256,22 @@ if st.button("Kunci & Kirim", type="primary", use_container_width=True):
         except Exception as e:
             st.error(f"Gagal mencatat: {e}")
 
-# --- 8. JAVASCRIPT: TRANSISI HEADER ---
+# --- 8. JAVASCRIPT: LOGIKA TRANSISI HEADER ---
 components.html("""
 <script>
     try {
         const parentDoc = window.parent.document;
+        
         const logo1 = parentDoc.getElementById('logo1-wrapper');
         const logo2 = parentDoc.getElementById('logo2-container');
         
         if (logo1 && logo2) {
             const observer = new IntersectionObserver((entries) => {
                 if(entries[0].isIntersecting) {
+                    // Logo 1 terlihat, sembunyikan Logo 2
                     logo2.classList.remove('show');
                 } else {
+                    // Logo 1 tidak terlihat (scroll ke bawah), ekspansi Logo 2
                     logo2.classList.add('show');
                 }
             }, { threshold: 0 });
