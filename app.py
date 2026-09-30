@@ -119,12 +119,12 @@ st.markdown(
         transition: all 0.4s ease;
     }}
     #logo2-container.show {{
-        width: 145px; /* Lebar optimal untuk logo + teks */
+        width: 145px;
         opacity: 1;
         margin-right: 12px;
     }}
     #progress-container {{
-        flex: 1; /* Otomatis melebar di awal, menyempit saat logo 2 muncul */
+        flex: 1; 
         transition: all 0.4s ease;
     }}
 
@@ -132,59 +132,51 @@ st.markdown(
     ::-webkit-scrollbar {{ width: 8px !important; }}
     ::-webkit-scrollbar-thumb {{ background: #ff4b4b !important; border-radius: 8px !important; }}
 
-    /* KARTU FOTO FULL-FRAME (TANPA NAMA, CHECKBOX MELAYANG DI FOTO) */
+    /* KARTU FOTO PRESISI (24px LUAR, 12px DALAM) */
     div[data-testid="stVerticalBlockBorderWrapper"] {{
-        border-radius: 20px !important;
-        padding: 0px !important; /* Hapus celah dalam */
-        background: transparent !important;
-        border: 1px solid rgba(125, 125, 125, 0.15) !important;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
-        margin-bottom: 16px !important;
-        position: relative !important; /* Wadah acuan absolute */
-        overflow: hidden !important;
+        border-radius: 24px !important; /* LUAR 24px */
+        padding: 12px !important; /* PADDING 12px KEMBALI SEPERTI SEMULA */
+        background: rgba(125, 125, 125, 0.04) !important;
+        border: 1px solid rgba(125, 125, 125, 0.2) !important;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03) !important;
+        margin-bottom: 20px !important;
     }}
-    div[data-testid="stVerticalBlockBorderWrapper"] > div {{ padding: 0 !important; }}
+    div[data-testid="stVerticalBlockBorderWrapper"] > div {{
+        padding: 0 !important;
+    }}
     div[data-testid="stVerticalBlockBorderWrapper"] img {{
-        border-radius: 20px !important;
+        border-radius: 12px !important; /* DALAM 12px */
         width: 100% !important;
         object-fit: cover !important;
-        display: block !important;
     }}
-
-    /* CHECKBOX POJOK KIRI ATAS */
+    
+    /* CHECKBOX & NAMA FILE KEMBALI KE BAWAH FOTO (NORMAL & BERFUNGSI 100%) */
     div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stCheckbox"] {{
-        position: absolute !important;
-        top: 8px !important;
-        left: 8px !important;
-        background: rgba(0, 0, 0, 0.45) !important;
-        backdrop-filter: blur(4px) !important;
-        border-radius: 8px !important;
-        padding: 6px !important;
+        background: transparent !important;
+        border: none !important;
+        padding: 16px 8px 4px 8px !important;
         margin: 0 !important;
-        z-index: 10 !important;
-        border: 1px solid rgba(255, 255, 255, 0.15) !important;
-    }}
-    /* Sembunyikan label nama file */
-    div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stCheckbox"] label {{
-        gap: 0 !important;
-        min-height: 0 !important;
     }}
     div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stCheckbox"] label p {{
-        display: none !important;
+        font-size: 0.9rem !important;
+        font-weight: 600 !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }}
 
     /* FOOTER TOMBOL KIRI (MINIMALIS & COMPACT) */
     div[data-testid="stButton"] {{
         position: fixed !important;
         z-index: 99998 !important;
-        bottom: 12px !important; /* Sangat mepet bawah */
-        left: 12px !important;   /* Sangat mepet kiri */
-        width: auto !important;  /* Menyesuaikan ukuran teks */
+        bottom: 12px !important; 
+        left: 12px !important;   
+        width: auto !important;  
     }}
     div[data-testid="stButton"] button {{
         width: auto !important;
         height: 44px !important;
-        padding: 0 20px !important; /* Jarak pas untuk teks */
+        padding: 0 20px !important; 
         border-radius: 12px !important;
         color: white !important;
         font-size: 0.95rem !important;
@@ -275,7 +267,7 @@ html_header = f"""
 """
 st.markdown(html_header, unsafe_allow_html=True)
 
-# --- 6. GALERI KARTU FOTO (FULL FRAME) ---
+# --- 6. GALERI KARTU FOTO ---
 kolom = st.columns(3)
 for idx, photo in enumerate(photos):
     with kolom[idx % 3]:
@@ -283,14 +275,13 @@ for idx, photo in enumerate(photos):
             img_url = f"https://lh3.googleusercontent.com/d/{photo['id']}"
             file_name = photo["name"]
             
-            # Urutan Streamlit: Gambar digambar lebih dulu, baru Checkbox menimpanya dari atas kiri
             st.image(img_url, use_container_width=True)
             
             is_checked = file_name in st.session_state.terpilih
             is_disabled = (total_terpilih >= max_foto) and not is_checked
             
-            # Label kosong " " karena teksnya sudah disembunyikan via CSS
-            cek = st.checkbox(" ", value=is_checked, key=photo["id"], disabled=is_disabled)
+            # Label nama file dikembalikan agar tampil rapi di bawah foto
+            cek = st.checkbox(f"{file_name}", value=is_checked, key=photo["id"], disabled=is_disabled)
             
             if cek and file_name not in st.session_state.terpilih:
                 st.session_state.terpilih.add(file_name)
@@ -325,10 +316,8 @@ components.html("""
         if (logo1 && logo2) {
             const observer = new IntersectionObserver((entries) => {
                 if(entries[0].isIntersecting) {
-                    // Logo 1 terlihat -> Logo 2 disembunyikan, Bar Progress melebar penuh
                     logo2.classList.remove('show');
                 } else {
-                    // Digulir ke bawah -> Logo 2 muncul, Bar Progress menyempit ke kanan
                     logo2.classList.add('show');
                 }
             }, { threshold: 0 });
