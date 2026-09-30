@@ -10,7 +10,7 @@ import streamlit.components.v1 as components
 # --- 1. KONFIGURASI HALAMAN ---
 st.set_page_config(
     page_title="Fotonic - Seleksi Foto",
-    page_icon="📷",
+    page_icon="get_b64",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
