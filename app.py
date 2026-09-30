@@ -93,7 +93,7 @@ st.markdown(
 
     /* KARTU LUAR FOTO (LENGKUNGAN 24PX IDENTIK DENGAN HEADER) */
     div[data-testid="stVerticalBlockBorderWrapper"] {{
-        border-radius: 50px !important;
+        border-radius: 24px !important;
         padding: 12px !important;
         background: rgba(125, 125, 125, 0.04) !important;
         border: 1px solid rgba(125, 125, 125, 0.2) !important;
