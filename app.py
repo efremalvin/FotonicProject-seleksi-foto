@@ -10,12 +10,12 @@ import streamlit.components.v1 as components
 # --- 1. KONFIGURASI HALAMAN ---
 st.set_page_config(
     page_title="Fotonic - Seleksi Foto",
-    page_icon="base64",
+    page_icon="📷",
     layout="wide",
     initial_sidebar_state="collapsed",
 )
 
-# --- FUNGSI BACA LOGO DARI GITHUB LOKAL ---
+# --- FUNGSI BACA LOGO DARI GITHUB ---
 def get_b64(path):
     if os.path.exists(path):
         with open(path, "rb") as f:
@@ -27,7 +27,7 @@ w1 = get_b64("whitelogo1.png")
 b2 = get_b64("blacklogo2.png")
 w2 = get_b64("whitelogo2.png")
 
-# HTML Fallback (Menampilkan teks jika gambar belum diunggah)
+# HTML Fallback
 img1_light = f'<img src="{b1}" class="img-light logo1-size">' if b1 else '<div class="img-light fallback-logo">Fotonic<br><span>Photo & Video Project</span></div>'
 img1_dark  = f'<img src="{w1}" class="img-dark logo1-size">' if w1 else '<div class="img-dark fallback-logo">Fotonic<br><span>Photo & Video Project</span></div>'
 img2_light = f'<img src="{b2}" class="img-light logo2-size">' if b2 else '<span class="img-light" style="font-size:1.5rem;">📷</span>'
@@ -41,7 +41,7 @@ st.markdown(
     footer {{visibility: hidden !important;}}
     
     .block-container {{
-        padding-top: 1rem !important;
+        padding-top: 150px !important; /* Memberi ruang agar tidak tertutup header fixed */
         padding-bottom: 120px !important;
         max-width: 1200px !important;
     }}
@@ -58,24 +58,35 @@ st.markdown(
     .fallback-logo {{ font-size: 2rem; font-weight: bold; text-align: center; line-height: 1.1; }}
     .fallback-logo span {{ font-size: 1rem; font-weight: normal; color: #71717a; }}
     
-    .header-logo-1 {{ padding: 10px 0 40px 0; }}
+    /* HEADER LOGO 1 */
+    .header-logo-1 {{
+        position: absolute;
+        top: 20px;
+        left: 0;
+        right: 0;
+        text-align: center;
+        z-index: 1;
+    }}
 
-    /* STICKY HEADER (DIKUNCI LENGKUNGAN 24PX) */
-    .sticky-top-header {{
-        position: sticky !important;
-        top: 0 !important;
+    /* HEADER FIXED (MENGAMBANG TETAP DI ATAS) */
+    .fixed-top-header {{
+        position: fixed !important;
+        top: 16px !important;
+        left: 20px !important;
+        right: 20px !important;
+        max-width: 1160px !important;
+        margin: 0 auto !important;
         z-index: 99990 !important;
         background: rgba(255, 255, 255, 0.94) !important;
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
         padding: 16px 24px !important;
-        border-radius: 24px !important; /* LENGKUNGAN HEADER */
+        border-radius: 24px !important; /* LENGKUNGAN 24PX */
         border: 1px solid rgba(0, 0, 0, 0.08) !important;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
-        margin-bottom: 24px;
     }}
     @media (prefers-color-scheme: dark) {{
-        .sticky-top-header {{
+        .fixed-top-header {{
             background: rgba(18, 18, 20, 0.94) !important;
             border: 1px solid rgba(255, 255, 255, 0.12) !important;
         }}
@@ -85,9 +96,9 @@ st.markdown(
     ::-webkit-scrollbar {{ width: 8px !important; }}
     ::-webkit-scrollbar-thumb {{ background: #ff4b4b !important; border-radius: 8px !important; }}
 
-    /* KARTU FOTO (DISAMAKAN PERSIS 24PX) */
+    /* KARTU FOTO PRESISI (24px LUAR, 12px DALAM) */
     div[data-testid="stVerticalBlockBorderWrapper"] {{
-        border-radius: 24px !important; /* LENGKUNGAN KARTU (SAMA DENGAN HEADER) */
+        border-radius: 24px !important; /* LENGKUNGAN SAMA DENGAN HEADER */
         padding: 12px !important;
         background: rgba(125, 125, 125, 0.04) !important;
         border: 1px solid rgba(125, 125, 125, 0.1) !important;
@@ -95,7 +106,7 @@ st.markdown(
         margin-bottom: 20px !important;
     }}
     div[data-testid="stVerticalBlockBorderWrapper"] img {{
-        border-radius: 14px !important; /* Lengkungan foto di dalam menyesuaikan */
+        border-radius: 12px !important; /* Presisi matematis agar tidak belang (24px - 12px padding) */
         width: 100% !important;
         object-fit: cover !important;
     }}
@@ -151,6 +162,11 @@ st.markdown(
         left: 50%;
         transform: translate(-50%, -50%);
     }}
+    
+    /* EFEK TRANSISI JS UNTUK LOGO 2 */
+    #logo2-container {{
+        transition: opacity 0.4s ease, transform 0.4s ease;
+    }}
 </style>
 """,
     unsafe_allow_html=True,
@@ -202,13 +218,15 @@ total_terpilih = len(st.session_state.terpilih)
 # --- 4. TAMPILAN HEADER LOGO 1 ---
 st.markdown(f'<div class="header-logo-1">{img1_light}{img1_dark}</div>', unsafe_allow_html=True)
 
-# --- 5. TAMPILAN STICKY HEADER (TIDAK ADA EFEK MENGHILANG LAGI) ---
+# TARGET ANCHOR TOP UNTUK JS
+st.markdown('<div id="anchor-top" style="height: 10px; margin-top: 50px;"></div>', unsafe_allow_html=True)
+
+# --- 5. TAMPILAN FIXED HEADER ---
 rasio = min(total_terpilih / max_foto, 1.0)
 warna_progres = '#22c55e' if total_terpilih == max_foto else '#ff4b4b'
 lebar_progres = int(rasio * 100)
 
-# Teks HTML disatukan tanpa jeda baris agar tidak bocor ke layar
-html_header = f"""<div class="sticky-top-header"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><div id="logo2-container" style="display:flex; align-items:center; gap:12px;"><div style="display:flex;">{img2_light}{img2_dark}</div><div><div style="font-size:1.1rem; font-weight:800; letter-spacing:-0.5px; line-height:1;">Fotonic</div><div style="font-size:0.75rem; color:#71717a; margin-top:2px;">Photo & Video Project</div></div></div><a href="https://instagram.com/fotonicproject" target="_blank" style="text-decoration:none; color:#71717a; font-size:0.85rem; font-weight:600;">Instagram ↗</a></div><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><span style="font-size:0.9rem; font-weight:600;">Klien: {klien}</span><span style="font-size:0.9rem; font-weight:800; color:{warna_progres};">{total_terpilih} / {max_foto} Foto</span></div><div style="width: 100%; background-color: rgba(125,125,125,0.2); border-radius: 999px; height: 6px;"><div style="width: {lebar_progres}%; background-color: {warna_progres}; height: 100%; border-radius: 999px; transition: width 0.4s ease;"></div></div></div>"""
+html_header = f"""<div class="fixed-top-header"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><div id="logo2-container" style="display:flex; align-items:center; gap:12px; opacity:0; transform:translateY(10px);"><div style="display:flex;">{img2_light}{img2_dark}</div><div><div style="font-size:1.1rem; font-weight:800; letter-spacing:-0.5px; line-height:1;">Fotonic</div><div style="font-size:0.75rem; color:#71717a; margin-top:2px;">Photo & Video Project</div></div></div><a href="https://instagram.com/fotonicproject" target="_blank" style="text-decoration:none; color:#71717a; font-size:0.85rem; font-weight:600;">Instagram ↗</a></div><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><span style="font-size:0.9rem; font-weight:600;">Klien: {klien}</span><span style="font-size:0.9rem; font-weight:800; color:{warna_progres};">{total_terpilih} / {max_foto} Foto</span></div><div style="width: 100%; background-color: rgba(125,125,125,0.2); border-radius: 999px; height: 6px;"><div style="width: {lebar_progres}%; background-color: {warna_progres}; height: 100%; border-radius: 999px; transition: width 0.4s ease;"></div></div></div>"""
 
 st.markdown(html_header, unsafe_allow_html=True)
 
@@ -232,6 +250,9 @@ for idx, photo in enumerate(photos):
                 st.session_state.terpilih.remove(file_name)
                 st.rerun()
 
+# TARGET ANCHOR BOTTOM UNTUK JS
+st.markdown('<div id="anchor-bottom" style="height: 10px; margin-bottom: 50px;"></div>', unsafe_allow_html=True)
+
 # --- 7. FOOTER KONFIRMASI ---
 if st.button(f"Kunci & Kirim ({total_terpilih}/{max_foto})", type="primary", use_container_width=True):
     if total_terpilih < max_foto:
@@ -247,36 +268,49 @@ if st.button(f"Kunci & Kirim ({total_terpilih}/{max_foto})", type="primary", use
         except Exception as e:
             st.error(f"Gagal mencatat: {e}")
 
-# --- 8. JAVASCRIPT: TRANSISI TOMBOL FOOTER ---
+# --- 8. JAVASCRIPT INTERSECTION OBSERVER (KEBAL BLOKIR STREAMLIT) ---
 components.html("""
 <script>
     try {
         const parentDoc = window.parent.document;
-        // Mencari wadah scroll yang lebih akurat
-        const viewContainer = parentDoc.querySelector('.stAppViewMain') || parentDoc.querySelector('.stAppViewContainer');
         
-        function updateLayout() {
-            if (!viewContainer) return;
-            const scrollPos = viewContainer.scrollTop;
-            const maxScroll = viewContainer.scrollHeight - viewContainer.clientHeight;
-            
-            // Animasi Footer (Mentok = Full 1/3, Atas = Bubble)
-            const btn = parentDoc.querySelector('div[data-testid="stButton"]');
-            if (btn) {
-                if (maxScroll - scrollPos < 120) {
-                    btn.classList.remove('fab-mode'); 
+        // 1. Observer untuk Header Logo (Saat mulai scroll ke bawah dari posisi paling atas)
+        const topAnchor = parentDoc.getElementById('anchor-top');
+        const logo2 = parentDoc.getElementById('logo2-container');
+        
+        if (topAnchor && logo2) {
+            const observerTop = new IntersectionObserver((entries) => {
+                if(entries[0].isIntersecting) {
+                    // Sedang di paling atas
+                    logo2.style.opacity = '0';
+                    logo2.style.transform = 'translateY(10px)';
                 } else {
-                    btn.classList.add('fab-mode');    
+                    // Sudah scroll ke bawah
+                    logo2.style.opacity = '1';
+                    logo2.style.transform = 'translateY(0)';
                 }
-            }
+            }, { threshold: 0 });
+            observerTop.observe(topAnchor);
         }
         
-        if (viewContainer) {
-            viewContainer.addEventListener('scroll', updateLayout);
-            setTimeout(updateLayout, 300);
+        // 2. Observer untuk Footer Tombol (Saat mentok di akhir galeri)
+        const bottomAnchor = parentDoc.getElementById('anchor-bottom');
+        const btn = parentDoc.querySelector('div[data-testid="stButton"]');
+        
+        if (bottomAnchor && btn) {
+            const observerBottom = new IntersectionObserver((entries) => {
+                if(entries[0].isIntersecting) {
+                    // Sedang mentok di bawah (tombol memanjang)
+                    btn.classList.remove('fab-mode');
+                } else {
+                    // Masih di tengah galeri (tombol mengecil jadi bubble)
+                    btn.classList.add('fab-mode');
+                }
+            }, { rootMargin: "150px" });
+            observerBottom.observe(bottomAnchor);
         }
     } catch (error) {
-        console.log("Transisi JS gagal: ", error);
+        console.log("Observer gagal: ", error);
     }
 </script>
 """, height=0)
