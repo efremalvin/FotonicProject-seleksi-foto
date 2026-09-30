@@ -210,33 +210,8 @@ rasio = min(total_terpilih / max_foto, 1.0)
 warna_progres = '#22c55e' if total_terpilih == max_foto else '#ff4b4b'
 lebar_progres = int(rasio * 100)
 
-html_header = f"""
-<div class="sticky-header">
-    <!-- Area Baris Pertama: Logo 2 & Instagram -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; height: 34px;">
-        <!-- Logo 2 (Muncul otomatis saat scroll) -->
-        <div id="logo2-container">
-            <div style="display:flex;">{img2_light}{img2_dark}</div>
-            <div>
-                <div style="font-size:1.1rem; font-weight:800; letter-spacing:-0.5px; line-height:1;">Fotonic</div>
-            </div>
-        </div>
-        <!-- Instagram -->
-        <a href="https://instagram.com/fotonicproject" target="_blank" style="text-decoration:none; color:#71717a; font-size:0.85rem; font-weight:600; margin-left:auto;">Instagram ↗</a>
-    </div>
-    
-    <!-- Area Baris Kedua: Klien & Angka -->
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
-        <span style="font-size:0.9rem; font-weight:600;">Klien: {klien}</span>
-        <span style="font-size:0.9rem; font-weight:800; color:{warna_progres};">{total_terpilih} / {max_foto} Foto</span>
-    </div>
-    
-    <!-- Area Baris Ketiga: Garis Progres -->
-    <div style="width: 100%; background-color: rgba(125,125,125,0.2); border-radius: 999px; height: 6px;">
-        <div style="width: {lebar_progres}%; background-color: {warna_progres}; height: 100%; border-radius: 999px; transition: width 0.4s ease;"></div>
-    </div>
-</div>
-"""
+# HTML Header dijadikan satu baris panjang untuk mencegah kebocoran Markdown
+html_header = f'<div class="sticky-header"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; height: 34px;"><div id="logo2-container"><div style="display:flex;">{img2_light}{img2_dark}</div><div><div style="font-size:1.1rem; font-weight:800; letter-spacing:-0.5px; line-height:1;">Fotonic</div></div></div><a href="https://instagram.com/fotonicproject" target="_blank" style="text-decoration:none; color:#71717a; font-size:0.85rem; font-weight:600; margin-left:auto;">Instagram ↗</a></div><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><span style="font-size:0.9rem; font-weight:600;">Klien: {klien}</span><span style="font-size:0.9rem; font-weight:800; color:{warna_progres};">{total_terpilih} / {max_foto} Foto</span></div><div style="width: 100%; background-color: rgba(125,125,125,0.2); border-radius: 999px; height: 6px;"><div style="width: {lebar_progres}%; background-color: {warna_progres}; height: 100%; border-radius: 999px; transition: width 0.4s ease;"></div></div></div>'
 st.markdown(html_header, unsafe_allow_html=True)
 
 # --- 6. GALERI KARTU FOTO ---
@@ -280,17 +255,16 @@ components.html("""
     try {
         const parentDoc = window.parent.document;
         
-        // Membaca area Logo 1 untuk mendeteksi scroll
         const logo1 = parentDoc.getElementById('logo1-wrapper');
         const logo2 = parentDoc.getElementById('logo2-container');
         
         if (logo1 && logo2) {
             const observer = new IntersectionObserver((entries) => {
                 if(entries[0].isIntersecting) {
-                    // Jika Logo 1 masih terlihat di layar -> Sembunyikan Logo 2 di header
+                    // Logo 1 terlihat, sembunyikan Logo 2
                     logo2.classList.remove('show');
                 } else {
-                    // Jika Logo 1 sudah tergulir ke atas dan hilang -> Munculkan Logo 2
+                    // Logo 1 tidak terlihat (scroll ke bawah), tampilkan Logo 2
                     logo2.classList.add('show');
                 }
             }, { threshold: 0 });
