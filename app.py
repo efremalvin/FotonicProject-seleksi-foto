@@ -27,7 +27,7 @@ w1 = get_b64("whitelogo1.png")
 b2 = get_b64("blacklogo2.png")
 w2 = get_b64("whitelogo2.png")
 
-# HTML Fallback (Akan muncul jika gambar gagal ditemukan/belum diunggah)
+# HTML Fallback (Menampilkan teks jika gambar belum diunggah)
 img1_light = f'<img src="{b1}" class="img-light logo1-size">' if b1 else '<div class="img-light fallback-logo">Fotonic<br><span>Photo & Video Project</span></div>'
 img1_dark  = f'<img src="{w1}" class="img-dark logo1-size">' if w1 else '<div class="img-dark fallback-logo">Fotonic<br><span>Photo & Video Project</span></div>'
 img2_light = f'<img src="{b2}" class="img-light logo2-size">' if b2 else '<span class="img-light" style="font-size:1.5rem;">📷</span>'
@@ -46,6 +46,7 @@ st.markdown(
         max-width: 1200px !important;
     }}
 
+    /* SISTEM TEMA OTOMATIS */
     .img-dark {{ display: none !important; }}
     @media (prefers-color-scheme: dark) {{
         .img-light {{ display: none !important; }}
@@ -59,7 +60,7 @@ st.markdown(
     
     .header-logo-1 {{ padding: 10px 0 40px 0; }}
 
-    /* STICKY HEADER ROUNDED 30PX */
+    /* STICKY HEADER (DIKUNCI LENGKUNGAN 24PX) */
     .sticky-top-header {{
         position: sticky !important;
         top: 0 !important;
@@ -68,7 +69,7 @@ st.markdown(
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
         padding: 16px 24px !important;
-        border-radius: 30px;
+        border-radius: 24px !important; /* LENGKUNGAN HEADER */
         border: 1px solid rgba(0, 0, 0, 0.08) !important;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
         margin-bottom: 24px;
@@ -84,9 +85,9 @@ st.markdown(
     ::-webkit-scrollbar {{ width: 8px !important; }}
     ::-webkit-scrollbar-thumb {{ background: #ff4b4b !important; border-radius: 8px !important; }}
 
-    /* KARTU FOTO DISAMAKAN DENGAN HEADER (30px) */
+    /* KARTU FOTO (DISAMAKAN PERSIS 24PX) */
     div[data-testid="stVerticalBlockBorderWrapper"] {{
-        border-radius: 30px !important; /* SAMA DENGAN HEADER */
+        border-radius: 24px !important; /* LENGKUNGAN KARTU (SAMA DENGAN HEADER) */
         padding: 12px !important;
         background: rgba(125, 125, 125, 0.04) !important;
         border: 1px solid rgba(125, 125, 125, 0.1) !important;
@@ -94,14 +95,14 @@ st.markdown(
         margin-bottom: 20px !important;
     }}
     div[data-testid="stVerticalBlockBorderWrapper"] img {{
-        border-radius: 20px !important; /* Lengkungan dalam foto menyesuaikan */
+        border-radius: 14px !important; /* Lengkungan foto di dalam menyesuaikan */
         width: 100% !important;
         object-fit: cover !important;
     }}
     div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stCheckbox"] {{
         background: transparent !important;
         border: none !important;
-        padding: 16px 20px 4px 20px !important;
+        padding: 16px 12px 4px 12px !important;
         margin: 0 !important;
     }}
     div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stCheckbox"] label p {{
@@ -109,7 +110,7 @@ st.markdown(
         font-weight: 600 !important;
     }}
 
-    /* CSS FALLBACK / DEFAULT UNTUK TOMBOL (FULL MODE - MAKSIMAL 1/3 KIRI) */
+    /* FOOTER / TOMBOL KONFIRMASI */
     div[data-testid="stButton"] {{
         position: fixed !important;
         z-index: 99998 !important;
@@ -130,7 +131,7 @@ st.markdown(
         box-shadow: 0 6px 16px rgba(255, 75, 75, 0.25) !important;
     }}
 
-    /* BUBBLE KIRI BAWAH SAAT BELUM SCROLL MENTOK */
+    /* MODE BUBBLE KIRI BAWAH */
     div[data-testid="stButton"].fab-mode {{
         width: 60px !important;
         min-width: 60px !important;
@@ -149,17 +150,6 @@ st.markdown(
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-    }}
-    
-    /* UNTUK HEADER LOGO 2 */
-    #logo2-container {{
-        opacity: 1;
-        transform: translateY(0);
-        transition: opacity 0.4s ease, transform 0.4s ease;
-    }}
-    #logo2-container.hidden-top {{
-        opacity: 0;
-        transform: translateY(8px);
     }}
 </style>
 """,
@@ -212,12 +202,13 @@ total_terpilih = len(st.session_state.terpilih)
 # --- 4. TAMPILAN HEADER LOGO 1 ---
 st.markdown(f'<div class="header-logo-1">{img1_light}{img1_dark}</div>', unsafe_allow_html=True)
 
-# --- 5. TAMPILAN STICKY HEADER ---
+# --- 5. TAMPILAN STICKY HEADER (TIDAK ADA EFEK MENGHILANG LAGI) ---
 rasio = min(total_terpilih / max_foto, 1.0)
 warna_progres = '#22c55e' if total_terpilih == max_foto else '#ff4b4b'
 lebar_progres = int(rasio * 100)
 
-html_header = f"""<div class="sticky-top-header"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><div id="logo2-container" class="hidden-top" style="display:flex; align-items:center; gap:12px;"><div style="display:flex;">{img2_light}{img2_dark}</div><div><div style="font-size:1.1rem; font-weight:800; letter-spacing:-0.5px; line-height:1;">Fotonic</div><div style="font-size:0.75rem; color:#71717a; margin-top:2px;">Photo & Video Project</div></div></div><a href="https://instagram.com/fotonicproject" target="_blank" style="text-decoration:none; color:#71717a; font-size:0.85rem; font-weight:600;">Instagram ↗</a></div><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><span style="font-size:0.9rem; font-weight:600;">Klien: {klien}</span><span style="font-size:0.9rem; font-weight:800; color:{warna_progres};">{total_terpilih} / {max_foto} Foto</span></div><div style="width: 100%; background-color: rgba(125,125,125,0.2); border-radius: 999px; height: 6px;"><div style="width: {lebar_progres}%; background-color: {warna_progres}; height: 100%; border-radius: 999px; transition: width 0.4s ease;"></div></div></div>"""
+# Teks HTML disatukan tanpa jeda baris agar tidak bocor ke layar
+html_header = f"""<div class="sticky-top-header"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;"><div id="logo2-container" style="display:flex; align-items:center; gap:12px;"><div style="display:flex;">{img2_light}{img2_dark}</div><div><div style="font-size:1.1rem; font-weight:800; letter-spacing:-0.5px; line-height:1;">Fotonic</div><div style="font-size:0.75rem; color:#71717a; margin-top:2px;">Photo & Video Project</div></div></div><a href="https://instagram.com/fotonicproject" target="_blank" style="text-decoration:none; color:#71717a; font-size:0.85rem; font-weight:600;">Instagram ↗</a></div><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><span style="font-size:0.9rem; font-weight:600;">Klien: {klien}</span><span style="font-size:0.9rem; font-weight:800; color:{warna_progres};">{total_terpilih} / {max_foto} Foto</span></div><div style="width: 100%; background-color: rgba(125,125,125,0.2); border-radius: 999px; height: 6px;"><div style="width: {lebar_progres}%; background-color: {warna_progres}; height: 100%; border-radius: 999px; transition: width 0.4s ease;"></div></div></div>"""
 
 st.markdown(html_header, unsafe_allow_html=True)
 
@@ -256,33 +247,26 @@ if st.button(f"Kunci & Kirim ({total_terpilih}/{max_foto})", type="primary", use
         except Exception as e:
             st.error(f"Gagal mencatat: {e}")
 
-# --- 8. JAVASCRIPT: TRANSISI HEADER & FOOTER ---
+# --- 8. JAVASCRIPT: TRANSISI TOMBOL FOOTER ---
 components.html("""
 <script>
     try {
         const parentDoc = window.parent.document;
-        const viewContainer = parentDoc.querySelector('.stAppViewContainer') || parentDoc.querySelector('.stMain');
+        // Mencari wadah scroll yang lebih akurat
+        const viewContainer = parentDoc.querySelector('.stAppViewMain') || parentDoc.querySelector('.stAppViewContainer');
         
         function updateLayout() {
             if (!viewContainer) return;
             const scrollPos = viewContainer.scrollTop;
             const maxScroll = viewContainer.scrollHeight - viewContainer.clientHeight;
             
-            const logo2 = parentDoc.getElementById('logo2-container');
-            if (logo2) {
-                if (scrollPos > 80) {
-                    logo2.classList.remove('hidden-top');
-                } else {
-                    logo2.classList.add('hidden-top');
-                }
-            }
-            
+            // Animasi Footer (Mentok = Full 1/3, Atas = Bubble)
             const btn = parentDoc.querySelector('div[data-testid="stButton"]');
             if (btn) {
                 if (maxScroll - scrollPos < 120) {
-                    btn.classList.remove('fab-mode');
+                    btn.classList.remove('fab-mode'); 
                 } else {
-                    btn.classList.add('fab-mode');
+                    btn.classList.add('fab-mode');    
                 }
             }
         }
@@ -292,7 +276,7 @@ components.html("""
             setTimeout(updateLayout, 300);
         }
     } catch (error) {
-        console.log("Transisi gagal: ", error);
+        console.log("Transisi JS gagal: ", error);
     }
 </script>
 """, height=0)
