@@ -75,7 +75,7 @@ st.markdown(
         backdrop-filter: blur(12px) !important;
         -webkit-backdrop-filter: blur(12px) !important;
         padding: 16px 24px !important;
-        border-radius: 24px !important; /* DISAMAKAN DENGAN KARTU 24px */
+        border-radius: 24px !important;
         border: 1px solid rgba(0, 0, 0, 0.08) !important;
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
         margin-bottom: 24px;
@@ -91,28 +91,42 @@ st.markdown(
     ::-webkit-scrollbar {{ width: 8px !important; }}
     ::-webkit-scrollbar-thumb {{ background: #ff4b4b !important; border-radius: 8px !important; }}
 
-    /* KARTU FOTO PRESISI (24px LUAR, 12px DALAM) */
+    /* KARTU LUAR FOTO (LENGKUNGAN 24PX IDENTIK DENGAN HEADER) */
     div[data-testid="stVerticalBlockBorderWrapper"] {{
-        border-radius: 24px !important; /* LUAR 24px */
-        padding: 12px !important; /* PADDING 12px */
+        border-radius: 24px !important;
+        padding: 12px !important;
         background: rgba(125, 125, 125, 0.04) !important;
         border: 1px solid rgba(125, 125, 125, 0.2) !important;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03) !important;
         margin-bottom: 20px !important;
+        overflow: hidden !important;
     }}
-    /* Mematikan padding bawaan Streamlit agar ukuran presisi */
     div[data-testid="stVerticalBlockBorderWrapper"] > div {{
         padding: 0 !important;
+        border-radius: 24px !important;
     }}
-    div[data-testid="stVerticalBlockBorderWrapper"] img {{
-        border-radius: 12px !important; /* DALAM 12px (24-12) */
+
+    /* KONTROL LENGKUNGAN FOTO DI DALAM (TARGET LENGKAP SEMUA LAPISAN) */
+    div[data-testid="stImage"] {{
+        border-radius: 12px !important;
+        overflow: hidden !important;
+        line-height: 0 !important;
+    }}
+    div[data-testid="stImage"] img,
+    div[data-testid="stImage"] > div,
+    div[data-testid="stImage"] picture {{
+        border-radius: 12px !important;
+        overflow: hidden !important;
         width: 100% !important;
         object-fit: cover !important;
+        display: block !important;
     }}
+
+    /* CHECKBOX & NAMA FILE */
     div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stCheckbox"] {{
         background: transparent !important;
         border: none !important;
-        padding: 16px 12px 4px 12px !important;
+        padding: 14px 8px 4px 8px !important;
         margin: 0 !important;
     }}
     div[data-testid="stVerticalBlockBorderWrapper"] div[data-testid="stCheckbox"] label p {{
@@ -120,13 +134,13 @@ st.markdown(
         font-weight: 600 !important;
     }}
 
-    /* FOOTER TOMBOL KIRI (SIMPEL, 50% HALAMAN) */
+    /* TOMBOL KIRI SIMPEL (50% LAYAR) */
     div[data-testid="stButton"] {{
         position: fixed !important;
         z-index: 99998 !important;
         bottom: 24px !important;
         left: 24px !important;
-        width: 50% !important; /* SETENGAH HALAMAN KIRI */
+        width: 50% !important;
         max-width: 400px !important;
     }}
     div[data-testid="stButton"] button {{
@@ -205,12 +219,11 @@ total_terpilih = len(st.session_state.terpilih)
 # --- 4. TAMPILAN HEADER LOGO 1 ---
 st.markdown(f'<div id="logo1-wrapper" class="header-logo-1">{img1_light}{img1_dark}</div>', unsafe_allow_html=True)
 
-# --- 5. TAMPILAN STICKY HEADER (MENGIKUTI SCROLL) ---
+# --- 5. TAMPILAN STICKY HEADER ---
 rasio = min(total_terpilih / max_foto, 1.0)
 warna_progres = '#22c55e' if total_terpilih == max_foto else '#ff4b4b'
 lebar_progres = int(rasio * 100)
 
-# HTML Header dijadikan satu baris panjang untuk mencegah kebocoran Markdown
 html_header = f'<div class="sticky-header"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; height: 34px;"><div id="logo2-container"><div style="display:flex;">{img2_light}{img2_dark}</div><div><div style="font-size:1.1rem; font-weight:800; letter-spacing:-0.5px; line-height:1;">Fotonic</div></div></div><a href="https://instagram.com/fotonicproject" target="_blank" style="text-decoration:none; color:#71717a; font-size:0.85rem; font-weight:600; margin-left:auto;">Instagram ↗</a></div><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;"><span style="font-size:0.9rem; font-weight:600;">Klien: {klien}</span><span style="font-size:0.9rem; font-weight:800; color:{warna_progres};">{total_terpilih} / {max_foto} Foto</span></div><div style="width: 100%; background-color: rgba(125,125,125,0.2); border-radius: 999px; height: 6px;"><div style="width: {lebar_progres}%; background-color: {warna_progres}; height: 100%; border-radius: 999px; transition: width 0.4s ease;"></div></div></div>'
 st.markdown(html_header, unsafe_allow_html=True)
 
@@ -234,7 +247,7 @@ for idx, photo in enumerate(photos):
                 st.session_state.terpilih.remove(file_name)
                 st.rerun()
 
-# --- 7. FOOTER KONFIRMASI (TOMBOL SIMPEL TANPA 0/15) ---
+# --- 7. FOOTER KONFIRMASI ---
 if st.button("Kunci & Kirim", type="primary", use_container_width=True):
     if total_terpilih < max_foto:
         st.warning(f"Pilihan belum lengkap. Kurang {max_foto - total_terpilih} foto lagi.")
@@ -249,22 +262,19 @@ if st.button("Kunci & Kirim", type="primary", use_container_width=True):
         except Exception as e:
             st.error(f"Gagal mencatat: {e}")
 
-# --- 8. JAVASCRIPT: LOGIKA TRANSISI HEADER ---
+# --- 8. JAVASCRIPT: TRANSISI HEADER ---
 components.html("""
 <script>
     try {
         const parentDoc = window.parent.document;
-        
         const logo1 = parentDoc.getElementById('logo1-wrapper');
         const logo2 = parentDoc.getElementById('logo2-container');
         
         if (logo1 && logo2) {
             const observer = new IntersectionObserver((entries) => {
                 if(entries[0].isIntersecting) {
-                    // Logo 1 terlihat, sembunyikan Logo 2
                     logo2.classList.remove('show');
                 } else {
-                    // Logo 1 tidak terlihat (scroll ke bawah), tampilkan Logo 2
                     logo2.classList.add('show');
                 }
             }, { threshold: 0 });
