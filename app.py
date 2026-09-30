@@ -27,7 +27,7 @@ w1 = get_b64("whitelogo1.png")
 b2 = get_b64("blacklogo2.png")
 w2 = get_b64("whitelogo2.png")
 
-# HTML Fallback
+# HTML Fallback (Akan muncul jika gambar gagal ditemukan/belum diunggah)
 img1_light = f'<img src="{b1}" class="img-light logo1-size">' if b1 else '<div class="img-light fallback-logo">Fotonic<br><span>Photo & Video Project</span></div>'
 img1_dark  = f'<img src="{w1}" class="img-dark logo1-size">' if w1 else '<div class="img-dark fallback-logo">Fotonic<br><span>Photo & Video Project</span></div>'
 img2_light = f'<img src="{b2}" class="img-light logo2-size">' if b2 else '<span class="img-light" style="font-size:1.5rem;">📷</span>'
@@ -59,7 +59,7 @@ st.markdown(
     
     .header-logo-1 {{ padding: 10px 0 40px 0; }}
 
-    /* STICKY HEADER */
+    /* STICKY HEADER ROUNDED 30PX */
     .sticky-top-header {{
         position: sticky !important;
         top: 0 !important;
@@ -84,17 +84,17 @@ st.markdown(
     ::-webkit-scrollbar {{ width: 8px !important; }}
     ::-webkit-scrollbar-thumb {{ background: #ff4b4b !important; border-radius: 8px !important; }}
 
-    /* KARTU FOTO EKSTREM (60px LUAR, 40px DALAM) */
+    /* KARTU FOTO DISAMAKAN DENGAN HEADER (30px) */
     div[data-testid="stVerticalBlockBorderWrapper"] {{
-        border-radius: 60px !important;
-        padding: 16px !important;
+        border-radius: 30px !important; /* SAMA DENGAN HEADER */
+        padding: 12px !important;
         background: rgba(125, 125, 125, 0.04) !important;
         border: 1px solid rgba(125, 125, 125, 0.1) !important;
         box-shadow: 0 4px 14px rgba(0, 0, 0, 0.03) !important;
         margin-bottom: 20px !important;
     }}
     div[data-testid="stVerticalBlockBorderWrapper"] img {{
-        border-radius: 40px !important;
+        border-radius: 20px !important; /* Lengkungan dalam foto menyesuaikan */
         width: 100% !important;
         object-fit: cover !important;
     }}
@@ -130,7 +130,7 @@ st.markdown(
         box-shadow: 0 6px 16px rgba(255, 75, 75, 0.25) !important;
     }}
 
-    /* JS AKAN MENAMBAHKAN CLASS INI JIKA HALAMAN BELUM MENTOK (BUBBLE KIRI BAWAH) */
+    /* BUBBLE KIRI BAWAH SAAT BELUM SCROLL MENTOK */
     div[data-testid="stButton"].fab-mode {{
         width: 60px !important;
         min-width: 60px !important;
@@ -212,7 +212,7 @@ total_terpilih = len(st.session_state.terpilih)
 # --- 4. TAMPILAN HEADER LOGO 1 ---
 st.markdown(f'<div class="header-logo-1">{img1_light}{img1_dark}</div>', unsafe_allow_html=True)
 
-# --- 5. TAMPILAN STICKY HEADER (TIDAK ADA SPASI INDENTASI HTML) ---
+# --- 5. TAMPILAN STICKY HEADER ---
 rasio = min(total_terpilih / max_foto, 1.0)
 warna_progres = '#22c55e' if total_terpilih == max_foto else '#ff4b4b'
 lebar_progres = int(rasio * 100)
@@ -268,7 +268,6 @@ components.html("""
             const scrollPos = viewContainer.scrollTop;
             const maxScroll = viewContainer.scrollHeight - viewContainer.clientHeight;
             
-            // Animasi Header
             const logo2 = parentDoc.getElementById('logo2-container');
             if (logo2) {
                 if (scrollPos > 80) {
@@ -278,13 +277,12 @@ components.html("""
                 }
             }
             
-            // Animasi Footer (Mentok = Full, Atas = Bubble Kiri)
             const btn = parentDoc.querySelector('div[data-testid="stButton"]');
             if (btn) {
                 if (maxScroll - scrollPos < 120) {
-                    btn.classList.remove('fab-mode'); // Berubah ke 1/3 Kiri
+                    btn.classList.remove('fab-mode');
                 } else {
-                    btn.classList.add('fab-mode');    // Berubah ke Bubble
+                    btn.classList.add('fab-mode');
                 }
             }
         }
