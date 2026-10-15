@@ -5,7 +5,7 @@ import { appendSelectionToSheet } from "@/lib/google/sheets";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { folderId, clientName, max, selectedFileIds } = body;
+    const { folderId, clientName, max, selectedFileIds, notes } = body;
 
     if (!folderId || !selectedFileIds || !Array.isArray(selectedFileIds)) {
       return NextResponse.json(
@@ -14,7 +14,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validasi batas kuota di server
     const parsedMax = Number(max);
     const effectiveMax =
       !isNaN(parsedMax) && parsedMax > 0 && parsedMax <= 15 ? parsedMax : 15;
@@ -36,29 +35,25 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Ambil daftar file otoritatif dari Drive untuk folder tersebut
     const photosInFolder = await getPhotosFromFolder(folderId);
     const photoMap = new Map(photosInFolder.map((p) => [p.id, p.name]));
 
-    // Validasi bahwa seluruh ID terpilih benar-benar ada di dalam folder tersebut
     const resolvedFileNames: string[] = [];
     for (const fileId of selectedFileIds) {
       const fileName = photoMap.get(fileId);
       if (!fileName) {
         return NextResponse.json(
-          {
-            error: `File dengan ID ${fileId} tidak valid atau tidak ditemukan dalam folder ini.`,
-          },
+          { error: `File tidak valid atau tidak ditemukan dalam folder ini.` },
           { status: 400 },
         );
       }
       resolvedFileNames.push(fileName);
     }
 
-    // Catat ke Google Sheets
     await appendSelectionToSheet({
       clientName: clientName || "Klien Fotonic",
       selectedFileNames: resolvedFileNames,
+      notes: typeof notes === "string" ? notes.trim() : undefined,
     });
 
     return NextResponse.json({

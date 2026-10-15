@@ -5,6 +5,7 @@ const spreadsheetId = process.env.GOOGLE_SPREADSHEET_ID;
 export interface SelectionSubmission {
   clientName: string;
   selectedFileNames: string[];
+  notes?: string;
 }
 
 export async function appendSelectionToSheet(
@@ -14,12 +15,10 @@ export async function appendSelectionToSheet(
     throw new Error("GOOGLE_SPREADSHEET_ID belum dikonfigurasi.");
   }
 
-  // Format timestamp YYYY-MM-DD HH:MM:SS
   const now = new Date();
   const pad = (n: number) => n.toString().padStart(2, "0");
   const waktu = `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
 
-  // Format daftar nama file dengan pemisah baris baru koma (persis seperti data asli)
   const daftarFileStr = submission.selectedFileNames.sort().join(",\n");
 
   const row = [
@@ -30,10 +29,15 @@ export async function appendSelectionToSheet(
     daftarFileStr,
   ];
 
+  // Tambahkan catatan ke kolom F jika diisi oleh klien
+  if (submission.notes) {
+    row.push(submission.notes);
+  }
+
   try {
     await sheetsClient.spreadsheets.values.append({
       spreadsheetId,
-      range: "Sheet1!A:E",
+      range: "Sheet1!A:F",
       valueInputOption: "USER_ENTERED",
       requestBody: {
         values: [row],
