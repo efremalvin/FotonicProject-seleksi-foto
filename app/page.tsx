@@ -276,7 +276,7 @@ function GalleryContent() {
           clientName={clientName}
           selectedFileNames={submittedFileNames}
           notes={notes}
-          adminWaNumber="6285783627177" // Masukkan nomor WhatsApp resmi Fotonic di sini
+          adminWaNumber="6281994218428" // Masukkan nomor WhatsApp resmi Fotonic di sini
         />
       )}
 

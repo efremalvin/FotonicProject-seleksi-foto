@@ -13,7 +13,7 @@ export default function SuccessModal({
   clientName,
   selectedFileNames,
   notes,
-  adminWaNumber = "6281234567890", // Ganti dengan nomor WhatsApp Admin Fotonic (awali kode negara tanpa tanda +)
+  adminWaNumber = "6281994218428", // Ganti dengan nomor WhatsApp Admin Fotonic (awali kode negara tanpa tanda +)
 }: SuccessModalProps) {
   // Susun daftar file bernomor urut
   const fileListText = selectedFileNames
