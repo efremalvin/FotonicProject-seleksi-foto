@@ -8,7 +8,7 @@ import ProgressBar from "@/components/ProgressBar";
 import PhotoCard from "@/components/PhotoCard";
 import PhotoModal from "@/components/PhotoModal";
 import PreviewView from "@/components/PreviewView";
-import SuccessModal from "@/components/SuccessModal";
+import SuccessModal from "@/components/Successmodal";
 
 interface Photo {
   id: string;
@@ -276,6 +276,7 @@ function GalleryContent() {
           clientName={clientName}
           selectedFileNames={submittedFileNames}
           notes={notes}
+          adminWaNumber="6285783627177" // Masukkan nomor WhatsApp resmi Fotonic di sini
         />
       )}
 
