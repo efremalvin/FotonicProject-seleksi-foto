@@ -226,6 +226,8 @@ def get_photos(f_id):
 
 photos = get_photos(folder_id)
 
+
+
 if "terpilih" not in st.session_state:
     st.session_state.terpilih = set()
 
@@ -273,6 +275,7 @@ for idx, photo in enumerate(photos):
     with kolom[idx % 3]:
         with st.container(border=True):
             img_url = f"https://lh3.googleusercontent.com/d/{photo['id']}"
+            
             file_name = photo["name"]
             
             st.image(img_url, use_container_width=True)
